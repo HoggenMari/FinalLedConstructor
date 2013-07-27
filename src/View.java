@@ -76,7 +76,6 @@ public class View extends JFrame implements Observer, MouseListener,
 
 		this.add(panel, BorderLayout.NORTH);
 		this.add(origImgLabel, BorderLayout.WEST);
-		// this.add(new Freihandzeichnen());
 
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
