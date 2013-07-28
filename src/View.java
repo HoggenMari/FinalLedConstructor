@@ -170,6 +170,9 @@ public class View extends JFrame implements Observer, MouseListener,
 				int iy = minY;
 				while (iy < maxY) {
 					System.out.println(checkColor(ix, iy));
+					if(checkColor(ix,iy)) {
+						g.drawRect(ix, iy, pixelX, pixelY);
+					}
 					//System.out.println("ix+"+ix+"iy:"+iy);
 					iy = iy + Math.max(pixelY, 1);
 				}
