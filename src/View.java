@@ -36,7 +36,7 @@ public class View extends JFrame implements Observer, MouseListener,
 	private JButton clearBtn = new JButton("Clear");
 	private JButton nextBtn = new JButton("Next");
 
-	private ImageIcon origImage;
+	private ImageIcon Image;
 
 	private JLabel origImgLabel;
 
@@ -62,6 +62,10 @@ public class View extends JFrame implements Observer, MouseListener,
 
 	private int newHeight;
 
+	private Graphics2D h;
+
+	private Graphics2D i;
+
 	View(Controller controller) {
 
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -85,8 +89,8 @@ public class View extends JFrame implements Observer, MouseListener,
 		
 		
 
-		origImage = new ImageIcon();
-		origImgLabel = new JLabel(origImage);
+		Image = new ImageIcon();
+		origImgLabel = new JLabel(Image);
 
 		this.add(panel, BorderLayout.NORTH);
 		this.add(origImgLabel, BorderLayout.WEST);
@@ -113,15 +117,17 @@ public class View extends JFrame implements Observer, MouseListener,
 			System.out.println(scaleFactor);
 			System.out.println(newHeight);
 			//model.setOriginalImage(model.getOriginalImage().getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH));
-			origImage.setImage(model.getOriginalImage());
-			Image img = origImage.getImage();
+			Image.setImage(model.getOriginalImage());
+			Image img = Image.getImage();
 			BufferedImage tmpImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
 			g = (Graphics2D) tmpImage.getGraphics();
 			g.scale(scaleFactor, scaleFactor);
 			g.drawImage(img, 0, 0, null);
 			g.dispose();
-			origImage.setImage(tmpImage);
+			Image.setImage(tmpImage);
+			model.setScaledImage(tmpImage);
 			model.setPaintImage(tmpImage);
+
 
 		}
 
@@ -168,21 +174,25 @@ public class View extends JFrame implements Observer, MouseListener,
 	public void mouseDragged(MouseEvent e) {
 		System.out.println("Released");
 		
-		
-		model.setOutputImage(model.getPaintImage());
-		g = (Graphics2D) model.getPaintImage().getGraphics();
-		g.drawImage(model.getPaintImage(), 0, 0, newWidth, newHeight, null);
-		g.setStroke(new BasicStroke(10));
-		g.setColor(Color.GREEN);
+		Image img = model.getPaintImage();
+		BufferedImage tmpImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+		h = (Graphics2D) tmpImage.getGraphics();
+		h.drawImage(img, 0, 0, newWidth, newHeight, null);
+		h.setStroke(new BasicStroke(10));
+		h.setColor(Color.GREEN);
 		int xTemp = e.getX() - origImgLabel.getLocation().x;
 		int yTemp = e.getY() - origImgLabel.getLocation().y;
 		
 		model.min(x, y, xTemp, yTemp);
 		
 		
-		g.drawLine(x, y, xTemp, yTemp);
+		h.drawLine(x, y, xTemp, yTemp);
 		x = xTemp;
 		y = yTemp;
+		
+		Image.setImage(tmpImage);
+		model.setPaintImage(tmpImage);
+		h.dispose();
 
 		if (!ledMaxWidthField.getText().isEmpty()
 				& !ledMaxHeightField.getText().isEmpty()) {
@@ -212,22 +222,39 @@ public class View extends JFrame implements Observer, MouseListener,
 				}
 				ix = ix + Math.max(pixelX, 1);
 			}
+			Image img2 = model.getPaintImage();
+			BufferedImage tmpImage2 = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+			i = (Graphics2D) tmpImage2.getGraphics();
+			i.drawImage(img2, 0, 0, newWidth, newHeight, null);
+
+			i.setStroke(new BasicStroke(1));
+			i.setColor(Color.DARK_GRAY);
+			
+			
+			for (Point p : point) {
+				  i.drawRect(p.x, p.y, pixelX, pixelY);
+			}	
+			
+			i.dispose();
+			Image.setImage(tmpImage2);
+			//model.setScaledImage(tmpImage2);
+
+			
 		} else {
 			System.out.println("Leeres Textfeld");
 		}
 		
 		//model.setOutputImage(model.getPaintImage());
 		//g = (Graphics2D) model.getPaintImage().getGraphics();
-		g.setStroke(new BasicStroke(2));
+		/*g.setStroke(new BasicStroke(2));
 		g.setColor(Color.CYAN);
 		
 		
 		for (Point p : point) {
 			  g.drawRect(p.x, p.y, pixelX, pixelY);
-		}
+		}*/
 		
-		origImage.setImage(model.getPaintImage());
-		g.dispose();
+
 		this.pack();
 		this.repaint();
 
