@@ -4,11 +4,14 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -52,12 +55,13 @@ public class View extends JFrame implements Observer, MouseListener,
 
 	private int maxHeightLed;
 
-	private int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0,
-			maxY = 0;
-
 	private int pixelX;
 
 	private int pixelY;
+
+	private ArrayList<Point> point;
+
+	private Graphics2D h;
 
 	View(Controller controller) {
 
@@ -68,6 +72,8 @@ public class View extends JFrame implements Observer, MouseListener,
 		JPanel panel = new JPanel();
 
 		loadImgBtn.addActionListener(controller);
+		clearBtn.addActionListener(controller);
+		nextBtn.addActionListener(controller);
 
 		panel.setLayout(new FlowLayout());
 		panel.add(loadImgBtn);
@@ -136,26 +142,32 @@ public class View extends JFrame implements Observer, MouseListener,
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		System.out.println("Released");
+		/*for (Point p : point) {
+			  g.drawRect(p.x, p.y, pixelX, pixelY);
+			}*/
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		System.out.println("Released");
-		bufImg = model.getOriginalImage();
-		g = (Graphics2D) bufImg.getGraphics();
+		model.setPaintImage(model.getOriginalImage());
+		g = (Graphics2D) model.getPaintImage().getGraphics();
 		g.setStroke(new BasicStroke(10));
 		g.setColor(Color.GREEN);
 		int xTemp = e.getX() - origImgLabel.getLocation().x;
 		int yTemp = e.getY() - origImgLabel.getLocation().y;
 		
-		minX = Math.min(minX, x);
+		model.min(x, y, xTemp, yTemp);
+		
+		/*minX = Math.min(minX, x);
 		minY = Math.min(minY, y);
 		maxX = Math.max(maxX, x);
 		maxY = Math.max(maxY, y);
 		minX = Math.min(minX, xTemp);
 		minY = Math.min(minY, yTemp);
 		maxX = Math.max(maxX, xTemp);
-		maxY = Math.max(maxY, yTemp);
+		maxY = Math.max(maxY, yTemp);*/
 		
 		g.drawLine(x, y, xTemp, yTemp);
 		x = xTemp;
@@ -167,27 +179,22 @@ public class View extends JFrame implements Observer, MouseListener,
 			maxWidthLed = Integer.parseInt(ledMaxWidthField.getText());
 			maxHeightLed = Integer.parseInt(ledMaxHeightField.getText());
 			
-			pixelX = (maxX - minX) / maxWidthLed;
-			pixelY = (maxY - minY) / maxHeightLed;
+			pixelX = (model.getMaxX() - model.getMinX()) / maxWidthLed;
+			pixelY = (model.getMaxY() - model.getMinY()) / maxHeightLed;
 			
 			System.out.println("pixelX:"+pixelX);
 			System.out.println("pixelY"+pixelY);
-			System.out.println("minX:" + minX);
-			System.out.println("minY:" + minY);
-			System.out.println("maxX:" + maxX);
-			System.out.println("maxY:" + maxY);
 			
-			g.setStroke(new BasicStroke(2));
-			g.setColor(Color.CYAN);
-			//g.drawRect(minX, minY, maxX - minX, maxY - minY);
-			
-			int ix = minX;
-			while (ix < maxX) {
-				int iy = minY;
-				while (iy < maxY) {
+						
+			int ix = model.getMinX();
+			point = new ArrayList<Point>();
+			while (ix < model.getMaxX()) {
+				int iy = model.getMinY();
+				while (iy < model.getMaxY()) {
 					System.out.println(checkColor(ix, iy));
 					if(checkColor(ix,iy)) {
-						g.drawRect(ix, iy, pixelX, pixelY);
+						//g.drawRect(ix, iy, pixelX, pixelY);
+						point.add(new Point(ix, iy));
 					}
 					//System.out.println("ix+"+ix+"iy:"+iy);
 					iy = iy + Math.max(pixelY, 1);
@@ -197,9 +204,20 @@ public class View extends JFrame implements Observer, MouseListener,
 		} else {
 			System.out.println("Leeres Textfeld");
 		}
+		
+		model.setOutputImage(model.getPaintImage());
+		h = (Graphics2D) model.getPaintImage().getGraphics();
+		h.setStroke(new BasicStroke(2));
+		h.setColor(Color.CYAN);
+		
+		
+		for (Point p : point) {
+			  h.drawRect(p.x, p.y, pixelX, pixelY);
+			}
 
 		this.pack();
 		this.repaint();
+
 	}
 
 	@Override

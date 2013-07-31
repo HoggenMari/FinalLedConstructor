@@ -27,6 +27,9 @@ public class Controller implements ActionListener {
 		if (cmd.equals("Load Image")){
 			System.out.println("load");
 			openFile();
+		} else if (cmd.equals("Clear")){
+			System.out.println("clear");
+			clear();
 		}
 		
 	}
@@ -40,6 +43,14 @@ public class Controller implements ActionListener {
 	    {
 		    model.setImage(fc.getSelectedFile().getPath(), view.getWidth());
 	    }
+	}
+	
+	private void clear() {
+		model.setImage(model.getImageName(), view.getWidth());
+		model.setMinX(Integer.MAX_VALUE);
+		model.setMinY(Integer.MAX_VALUE);
+		model.setMaxX(0);
+		model.setMaxY(0);
 	}
 
 }

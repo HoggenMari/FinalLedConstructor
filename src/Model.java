@@ -8,10 +8,53 @@ import javax.imageio.ImageIO;
 
 public class Model extends Observable {
 
-	private BufferedImage originalImage;
+	private BufferedImage originalImage, paintImage, outputImage;
 	private boolean gotNewImage;
 	private String imageName;
+	private int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
+	private int maxX = 0, maxY = 0;
+
 	
+	public int getMinX() {
+		return minX;
+	}
+
+	public void setMinX(int minX) {
+		this.minX = minX;
+	}
+
+	public int getMinY() {
+		return minY;
+	}
+
+	public void setMinY(int minY) {
+		this.minY = minY;
+	}
+
+	public int getMaxX() {
+		return maxX;
+	}
+
+	public void setMaxX(int maxX) {
+		this.maxX = maxX;
+	}
+
+	public int getMaxY() {
+		return maxY;
+	}
+
+	public void setMaxY(int maxY) {
+		this.maxY = maxY;
+	}
+	
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
+	}
+
 	public Model() {
 		gotNewImage = false;
 	}
@@ -58,6 +101,32 @@ public class Model extends Observable {
 		this.originalImage = originalImage;
 	}
 	
+	public void min(int x, int y, int tempx, int tempy){
+		minX = Math.min(minX, x);
+		minY = Math.min(minY, y);
+		maxX = Math.max(maxX, x);
+		maxY = Math.max(maxY, y);
+		minX = Math.min(minX, tempx);
+		minY = Math.min(minY, tempy);
+		maxX = Math.max(maxX, tempx);
+		maxY = Math.max(maxY, tempy);
+	}
+
+	public BufferedImage getPaintImage() {
+		return paintImage;
+	}
+
+	public void setPaintImage(BufferedImage paintImage) {
+		this.paintImage = paintImage;
+	}
+
+	public BufferedImage getOutputImage() {
+		return outputImage;
+	}
+
+	public void setOutputImage(BufferedImage outputImage) {
+		this.outputImage = outputImage;
+	}
 	
 	
 }
