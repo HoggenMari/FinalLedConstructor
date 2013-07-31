@@ -32,7 +32,7 @@ public class View extends JFrame implements Observer, MouseListener,
 	private JButton loadImgBtn = new JButton("Load Image");
 	private JTextField ledMaxWidthField = new JTextField(5);
 	private JTextField ledMaxHeightField = new JTextField(5);
-	
+
 	private JButton clearBtn = new JButton("Clear");
 	private JButton nextBtn = new JButton("Next");
 
@@ -71,7 +71,7 @@ public class View extends JFrame implements Observer, MouseListener,
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(200, 600);
 		this.setTitle("LED Constructor");
-		
+
 		JPanel panel = new JPanel();
 
 		loadImgBtn.addActionListener(controller);
@@ -83,11 +83,9 @@ public class View extends JFrame implements Observer, MouseListener,
 		panel.add(new JLabel("Anzahl LEDs Breite:"));
 		panel.add(ledMaxWidthField);
 		panel.add(new JLabel("Anzahl LEDs Hšhe:"));
-		panel.add(ledMaxHeightField);		
+		panel.add(ledMaxHeightField);
 		panel.add(clearBtn);
 		panel.add(nextBtn);
-		
-		
 
 		Image = new ImageIcon();
 		origImgLabel = new JLabel(Image);
@@ -106,20 +104,17 @@ public class View extends JFrame implements Observer, MouseListener,
 	public void update(Observable o, Object arg1) {
 		model = (Model) o;
 
-		System.out.println(model.getOriginalImage().toString());
-
-
 		if (model.receivedNewImage()) {
+			
 			newWidth = this.getWidth();
-			double scaleFactor = (double)newWidth/model.getOriginalImage().getWidth();
-			newHeight = (int) (model.getOriginalImage().getHeight()*scaleFactor);
-			System.out.println(newWidth);
-			System.out.println(scaleFactor);
-			System.out.println(newHeight);
-			//model.setOriginalImage(model.getOriginalImage().getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH));
+			double scaleFactor = (double) newWidth
+					/ model.getOriginalImage().getWidth();
+			newHeight = (int) (model.getOriginalImage().getHeight() * scaleFactor);
+
 			Image.setImage(model.getOriginalImage());
 			Image img = Image.getImage();
-			BufferedImage tmpImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+			BufferedImage tmpImage = new BufferedImage(newWidth, newHeight,
+					BufferedImage.TYPE_INT_RGB);
 			g = (Graphics2D) tmpImage.getGraphics();
 			g.scale(scaleFactor, scaleFactor);
 			g.drawImage(img, 0, 0, null);
@@ -128,10 +123,8 @@ public class View extends JFrame implements Observer, MouseListener,
 			model.setScaledImage(tmpImage);
 			model.setPaintImage(tmpImage);
 
-
 		}
 
-		System.out.println("Repaint");
 		this.pack();
 		this.repaint();
 	}
@@ -159,101 +152,95 @@ public class View extends JFrame implements Observer, MouseListener,
 		x = e.getX() - origImgLabel.getLocation().x;
 		y = e.getY() - origImgLabel.getLocation().y;
 
-		System.out.println("Pressed");
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		System.out.println("Released");
-		/*for (Point p : point) {
-			  g.drawRect(p.x, p.y, pixelX, pixelY);
-			}*/
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		System.out.println("Released");
 		
+		//draw with GREEN Color on Canvas and model.paintImage
 		Image img = model.getPaintImage();
-		BufferedImage tmpImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+		BufferedImage tmpImage = new BufferedImage(newWidth, newHeight,
+				BufferedImage.TYPE_INT_RGB);
 		h = (Graphics2D) tmpImage.getGraphics();
 		h.drawImage(img, 0, 0, newWidth, newHeight, null);
-		h.setStroke(new BasicStroke(10));
-		h.setColor(Color.GREEN);
+
+		//mouseDragged-Coordinates
 		int xTemp = e.getX() - origImgLabel.getLocation().x;
 		int yTemp = e.getY() - origImgLabel.getLocation().y;
 		
-		model.min(x, y, xTemp, yTemp);
-		
-		
+		//color settings
+		h.setStroke(new BasicStroke(10));
+		h.setColor(Color.GREEN);
+
+		//draw line from mousePressed(x,y) to mouseDragged(xTemp, yTemp)
 		h.drawLine(x, y, xTemp, yTemp);
 		x = xTemp;
 		y = yTemp;
-		
+
+		//paintedImage on canvas and save in model.paintImage
 		Image.setImage(tmpImage);
 		model.setPaintImage(tmpImage);
 		h.dispose();
+		
+		//check for new min, max of painted area
+		model.min(x, y);
 
+		//draw rects for LEDs
 		if (!ledMaxWidthField.getText().isEmpty()
 				& !ledMaxHeightField.getText().isEmpty()) {
-			
+
 			maxWidthLed = Integer.parseInt(ledMaxWidthField.getText());
 			maxHeightLed = Integer.parseInt(ledMaxHeightField.getText());
-			
+
 			pixelX = (model.getMaxX() - model.getMinX()) / maxWidthLed;
 			pixelY = (model.getMaxY() - model.getMinY()) / maxHeightLed;
-			
-			System.out.println("pixelX:"+pixelX);
-			System.out.println("pixelY"+pixelY);
-			
-						
+
+			System.out.println("pixelX:" + pixelX);
+			System.out.println("pixelY" + pixelY);
+
 			int ix = model.getMinX();
 			point = new ArrayList<Point>();
 			while (ix < model.getMaxX()) {
 				int iy = model.getMinY();
 				while (iy < model.getMaxY()) {
 					System.out.println(checkColor(ix, iy));
-					if(checkColor(ix,iy)) {
-						//g.drawRect(ix, iy, pixelX, pixelY);
+					if (checkColor(ix, iy)) {
+						// g.drawRect(ix, iy, pixelX, pixelY);
 						point.add(new Point(ix, iy));
 					}
-					//System.out.println("ix+"+ix+"iy:"+iy);
+					// System.out.println("ix+"+ix+"iy:"+iy);
 					iy = iy + Math.max(pixelY, 1);
 				}
 				ix = ix + Math.max(pixelX, 1);
 			}
 			Image img2 = model.getPaintImage();
-			BufferedImage tmpImage2 = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+			BufferedImage tmpImage2 = new BufferedImage(newWidth, newHeight,
+					BufferedImage.TYPE_INT_RGB);
 			i = (Graphics2D) tmpImage2.getGraphics();
 			i.drawImage(img2, 0, 0, newWidth, newHeight, null);
 
 			i.setStroke(new BasicStroke(1));
-			i.setColor(Color.DARK_GRAY);
-			
-			
+
 			for (Point p : point) {
-				  i.drawRect(p.x, p.y, pixelX, pixelY);
-			}	
-			
+				i.setColor(Color.GREEN);
+				i.fillRect(p.x, p.y, pixelX, pixelY);
+				i.setColor(Color.DARK_GRAY);
+				i.drawRect(p.x, p.y, pixelX, pixelY);
+			}
+
 			i.dispose();
 			Image.setImage(tmpImage2);
-			//model.setScaledImage(tmpImage2);
+			// model.setScaledImage(tmpImage2);
 
-			
 		} else {
 			System.out.println("Leeres Textfeld");
 		}
-		
-		//model.setOutputImage(model.getPaintImage());
-		//g = (Graphics2D) model.getPaintImage().getGraphics();
-		/*g.setStroke(new BasicStroke(2));
-		g.setColor(Color.CYAN);
-		
-		
-		for (Point p : point) {
-			  g.drawRect(p.x, p.y, pixelX, pixelY);
-		}*/
-		
 
 		this.pack();
 		this.repaint();

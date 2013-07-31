@@ -110,15 +110,11 @@ public class Model extends Observable {
 		this.originalImage = originalImage;
 	}
 	
-	public void min(int x, int y, int tempx, int tempy){
+	public void min(int x, int y){
 		minX = Math.min(minX, x);
 		minY = Math.min(minY, y);
 		maxX = Math.max(maxX, x);
 		maxY = Math.max(maxY, y);
-		minX = Math.min(minX, tempx);
-		minY = Math.min(minY, tempy);
-		maxX = Math.max(maxX, tempx);
-		maxY = Math.max(maxY, tempy);
 	}
 
 	public BufferedImage getPaintImage() {
