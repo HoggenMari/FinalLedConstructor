@@ -3,6 +3,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -29,6 +30,9 @@ public class View extends JFrame implements Observer, MouseListener,
 	private JButton loadImgBtn = new JButton("Load Image");
 	private JTextField ledMaxWidthField = new JTextField(5);
 	private JTextField ledMaxHeightField = new JTextField(5);
+	
+	private JButton clearBtn = new JButton("Clear");
+	private JButton nextBtn = new JButton("Next");
 
 	private ImageIcon originalImage;
 
@@ -57,10 +61,11 @@ public class View extends JFrame implements Observer, MouseListener,
 
 	View(Controller controller) {
 
-		JPanel panel = new JPanel();
-
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setSize(600, 200);
+		this.setSize(200, 600);
+		this.setTitle("LED Constructor");
+		
+		JPanel panel = new JPanel();
 
 		loadImgBtn.addActionListener(controller);
 
@@ -69,7 +74,11 @@ public class View extends JFrame implements Observer, MouseListener,
 		panel.add(new JLabel("Anzahl LEDs Breite:"));
 		panel.add(ledMaxWidthField);
 		panel.add(new JLabel("Anzahl LEDs Hšhe:"));
-		panel.add(ledMaxHeightField);
+		panel.add(ledMaxHeightField);		
+		panel.add(clearBtn);
+		panel.add(nextBtn);
+		
+		
 
 		originalImage = new ImageIcon();
 		origImgLabel = new JLabel(originalImage);
@@ -138,6 +147,7 @@ public class View extends JFrame implements Observer, MouseListener,
 		g.setColor(Color.GREEN);
 		int xTemp = e.getX() - origImgLabel.getLocation().x;
 		int yTemp = e.getY() - origImgLabel.getLocation().y;
+		
 		minX = Math.min(minX, x);
 		minY = Math.min(minY, y);
 		maxX = Math.max(maxX, x);
@@ -146,25 +156,31 @@ public class View extends JFrame implements Observer, MouseListener,
 		minY = Math.min(minY, yTemp);
 		maxX = Math.max(maxX, xTemp);
 		maxY = Math.max(maxY, yTemp);
+		
 		g.drawLine(x, y, xTemp, yTemp);
 		x = xTemp;
 		y = yTemp;
 
 		if (!ledMaxWidthField.getText().isEmpty()
 				& !ledMaxHeightField.getText().isEmpty()) {
+			
 			maxWidthLed = Integer.parseInt(ledMaxWidthField.getText());
 			maxHeightLed = Integer.parseInt(ledMaxHeightField.getText());
+			
 			pixelX = (maxX - minX) / maxWidthLed;
 			pixelY = (maxY - minY) / maxHeightLed;
+			
 			System.out.println("pixelX:"+pixelX);
 			System.out.println("pixelY"+pixelY);
 			System.out.println("minX:" + minX);
 			System.out.println("minY:" + minY);
 			System.out.println("maxX:" + maxX);
 			System.out.println("maxY:" + maxY);
+			
 			g.setStroke(new BasicStroke(2));
 			g.setColor(Color.CYAN);
-			g.drawRect(minX, minY, maxX - minX, maxY - minY);
+			//g.drawRect(minX, minY, maxX - minX, maxY - minY);
+			
 			int ix = minX;
 			while (ix < maxX) {
 				int iy = minY;

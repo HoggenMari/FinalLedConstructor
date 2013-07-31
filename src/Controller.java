@@ -8,7 +8,6 @@ public class Controller implements ActionListener {
 	
 	private View view;
 	private Model model;
-	private JFileChooser chooser;
 	
 	public Controller() {
 		this.model = new Model();
