@@ -1,4 +1,3 @@
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Observable;
@@ -8,12 +7,21 @@ import javax.imageio.ImageIO;
 
 public class Model extends Observable {
 
-	private BufferedImage originalImage, paintImage, outputImage;
+	private BufferedImage originalImage, scaledImage, paintImage, outputImage;
+
+
 	private boolean gotNewImage;
 	private String imageName;
 	private int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
 	private int maxX = 0, maxY = 0;
+	
+	public BufferedImage getScaledImage() {
+		return scaledImage;
+	}
 
+	public void setScaledImage(BufferedImage scaledImage) {
+		this.scaledImage = scaledImage;
+	}
 	
 	public int getMinX() {
 		return minX;
@@ -69,17 +77,18 @@ public class Model extends Observable {
 			
 		}
 		
-		int originalImgWidth = originalImage.getWidth();
+		/*int originalImgWidth = originalImage.getWidth();
 		double scaleFactor = (double)width/(double)originalImgWidth;
 		
 		System.out.println(originalImgWidth);
 		
-		BufferedImage resizedImage = new BufferedImage(width, (int)(originalImage.getHeight()*scaleFactor), BufferedImage.TYPE_INT_RGB);
+		
+		resizedImage = new BufferedImage(width, (int)(originalImage.getHeight()*scaleFactor), BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = resizedImage.createGraphics();
-		g.drawImage(originalImage, 0, 0, width, (int)(originalImage.getHeight()*scaleFactor), null);
+		g.drawImage(resizedImage, 0, 0, resizedImage.getWidth(), resizedImage.getHeight(), null);
 		g.dispose();
 		
-		originalImage = resizedImage;
+		originalImage = resizedImage;*/
 		
 		
 		gotNewImage = true;

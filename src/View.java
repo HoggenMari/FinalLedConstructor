@@ -3,12 +3,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class View extends JFrame implements Observer, MouseListener,
 	private JButton clearBtn = new JButton("Clear");
 	private JButton nextBtn = new JButton("Next");
 
-	private ImageIcon originalImage;
+	private ImageIcon origImage;
 
 	private JLabel origImgLabel;
 
@@ -46,8 +45,6 @@ public class View extends JFrame implements Observer, MouseListener,
 	private int y;
 
 	private Model model;
-
-	private BufferedImage bufImg;
 
 	private Graphics2D g;
 
@@ -61,7 +58,9 @@ public class View extends JFrame implements Observer, MouseListener,
 
 	private ArrayList<Point> point;
 
-	private Graphics2D h;
+	private int newWidth;
+
+	private int newHeight;
 
 	View(Controller controller) {
 
@@ -86,8 +85,8 @@ public class View extends JFrame implements Observer, MouseListener,
 		
 		
 
-		originalImage = new ImageIcon();
-		origImgLabel = new JLabel(originalImage);
+		origImage = new ImageIcon();
+		origImgLabel = new JLabel(origImage);
 
 		this.add(panel, BorderLayout.NORTH);
 		this.add(origImgLabel, BorderLayout.WEST);
@@ -105,8 +104,25 @@ public class View extends JFrame implements Observer, MouseListener,
 
 		System.out.println(model.getOriginalImage().toString());
 
+
 		if (model.receivedNewImage()) {
-			originalImage.setImage(model.getOriginalImage());
+			newWidth = this.getWidth();
+			double scaleFactor = (double)newWidth/model.getOriginalImage().getWidth();
+			newHeight = (int) (model.getOriginalImage().getHeight()*scaleFactor);
+			System.out.println(newWidth);
+			System.out.println(scaleFactor);
+			System.out.println(newHeight);
+			//model.setOriginalImage(model.getOriginalImage().getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH));
+			origImage.setImage(model.getOriginalImage());
+			Image img = origImage.getImage();
+			BufferedImage tmpImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+			g = (Graphics2D) tmpImage.getGraphics();
+			g.scale(scaleFactor, scaleFactor);
+			g.drawImage(img, 0, 0, null);
+			g.dispose();
+			origImage.setImage(tmpImage);
+			model.setPaintImage(tmpImage);
+
 		}
 
 		System.out.println("Repaint");
@@ -151,8 +167,11 @@ public class View extends JFrame implements Observer, MouseListener,
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		System.out.println("Released");
-		model.setPaintImage(model.getOriginalImage());
+		
+		
+		model.setOutputImage(model.getPaintImage());
 		g = (Graphics2D) model.getPaintImage().getGraphics();
+		g.drawImage(model.getPaintImage(), 0, 0, newWidth, newHeight, null);
 		g.setStroke(new BasicStroke(10));
 		g.setColor(Color.GREEN);
 		int xTemp = e.getX() - origImgLabel.getLocation().x;
@@ -160,14 +179,6 @@ public class View extends JFrame implements Observer, MouseListener,
 		
 		model.min(x, y, xTemp, yTemp);
 		
-		/*minX = Math.min(minX, x);
-		minY = Math.min(minY, y);
-		maxX = Math.max(maxX, x);
-		maxY = Math.max(maxY, y);
-		minX = Math.min(minX, xTemp);
-		minY = Math.min(minY, yTemp);
-		maxX = Math.max(maxX, xTemp);
-		maxY = Math.max(maxY, yTemp);*/
 		
 		g.drawLine(x, y, xTemp, yTemp);
 		x = xTemp;
@@ -205,16 +216,18 @@ public class View extends JFrame implements Observer, MouseListener,
 			System.out.println("Leeres Textfeld");
 		}
 		
-		model.setOutputImage(model.getPaintImage());
-		h = (Graphics2D) model.getPaintImage().getGraphics();
-		h.setStroke(new BasicStroke(2));
-		h.setColor(Color.CYAN);
+		//model.setOutputImage(model.getPaintImage());
+		//g = (Graphics2D) model.getPaintImage().getGraphics();
+		g.setStroke(new BasicStroke(2));
+		g.setColor(Color.CYAN);
 		
 		
 		for (Point p : point) {
-			  h.drawRect(p.x, p.y, pixelX, pixelY);
-			}
-
+			  g.drawRect(p.x, p.y, pixelX, pixelY);
+		}
+		
+		origImage.setImage(model.getPaintImage());
+		g.dispose();
 		this.pack();
 		this.repaint();
 
@@ -230,7 +243,7 @@ public class View extends JFrame implements Observer, MouseListener,
 		int counter = 0;
 		for (int ix = x; ix < x + pixelX; ix++) {
 			for (int iy = y; iy < y + pixelY; iy++) {
-				if (model.getOriginalImage().getRGB(ix, iy) == Color.GREEN
+				if (model.getPaintImage().getRGB(ix, iy) == Color.GREEN
 						.getRGB()) {
 					counter++;
 				}
